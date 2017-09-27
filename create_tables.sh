@@ -7,7 +7,7 @@
 shopt -s nullglob
 
 # Searches through all the filenames ending in .csv in the search directory
-for file in /import/esdata/*.csv
+for file in /import/tables/*.csv
 do
 	echo "$file"
 	# Delete the longest match of */ where * in this case is /import/esdata/)
@@ -34,5 +34,8 @@ do
     DELETE FROM $filename \g
 END
 	# Load the .csv into the newly created table
-	vwload -u jira_issues -f "," -q "\"" -s 1 -l $filename.log -t $filename db /import/esdata/$filename.csv
+	vwload -u jira_issues -f "," -q "\"" -s 1 -l $filename.log -t $filename db /import/tables/$filename.csv
 done
+
+# sql db -ujira_issues
+# SELECT * FROM release_blockers
