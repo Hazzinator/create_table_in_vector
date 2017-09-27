@@ -7,13 +7,15 @@
 shopt -s nullglob
 
 # Searches through all the filenames ending in .csv in the search directory
-for file in "/import/esdata/*.csv"
+for file in /import/esdata/*.csv
 do
+	echo "$file"
 	# Delete the longest match of */ where * in this case is /import/esdata/)
 	filename=${file##*/}
+	echo "$filename"
 	# Delete the shortest match of .* from the end, in this case .csv
 	filename=${filename%%.*}
-	echo "Creating table $filename"
+	echo "$filename"
 	# Creates a table
     sql db -ujira_issues <<END
     CREATE TABLE $filename
@@ -29,5 +31,8 @@ do
         last_updated ANSIDATE NOT NULL
     ) WITH STRUCTURE = VECTORWISE ;
     \p\g
+    DELETE FROM $filename \g
 END
+	# Load the .csv into the newly created table
+	vwload -u jira_issues -f "," -q "\"" -s 1 -l $filename.log -t $filename db /import/esdata/$filename.csv
 done
