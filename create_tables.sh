@@ -9,7 +9,7 @@ shopt -s nullglob
 # Searches through all the filenames ending in .csv in the search directory
 for file in $search_directory/*.csv
 do
-	# Delete the longest match of */ where * in this case is /import/esdata/)
+	# Delete the longest match of */ where * in this case is /import/esdata/
 	filename=${file##*/}
 	# Delete the shortest match of .* from the end, in this case .csv
 	filename=${filename%%.*}
