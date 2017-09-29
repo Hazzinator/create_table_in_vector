@@ -1,41 +1,37 @@
 #!/bin/sh
 
 # The directory where the csv files will be stored
-#search_directory = "/import/esdata"
+search_directory='/import/tables/'
 
 # If there is nothing that matches a pattern, then a null is returned
 shopt -s nullglob
 
 # Searches through all the filenames ending in .csv in the search directory
-for file in /import/tables/*.csv
+for file in $search_directory/*.csv
 do
-	echo "$file"
 	# Delete the longest match of */ where * in this case is /import/esdata/)
 	filename=${file##*/}
-	echo "$filename"
 	# Delete the shortest match of .* from the end, in this case .csv
 	filename=${filename%%.*}
-	echo "$filename"
-	# Creates a table
+	# Drops a table if it already exists
+	sql db -ujira_issues <<END
+	DROP TABLE $filename \p\g
+END
     sql db -ujira_issues <<END
     CREATE TABLE $filename
     (
         snapshot_date ANSIDATE NOT NULL,
         key VARCHAR(12) PRIMARY KEY,
         summary VARCHAR(5000) NOT NULL,
-        status VARCHAR(20) NOT NULL,
-        assignee VARCHAR(50) NOT NULL,
-        priority VARCHAR(20) NOT NULL,
+        status VARCHAR(20),
+        assignee VARCHAR(50),
+        priority VARCHAR(20),
         created ANSIDATE NOT NULL,
         hubble_team VARCHAR(100) NOT NULL,
         last_updated ANSIDATE NOT NULL
     ) WITH STRUCTURE = VECTORWISE ;
     \p\g
-    DELETE FROM $filename \g
 END
 	# Load the .csv into the newly created table
 	vwload -u jira_issues -f "," -q "\"" -s 1 -l $filename.log -t $filename db /import/tables/$filename.csv
 done
-
-# sql db -ujira_issues
-# SELECT * FROM release_blockers
