@@ -13,7 +13,7 @@ do
 	filename=${file##*/}
 	# Delete the shortest match of .* from the end, in this case .csv
 	filename=${filename%%.*}
-	# Drops a table if it already exists
+	# Drops a table if it already exists.
 	sql db -ujira_issues <<END
 	DROP TABLE $filename \p\g
 END
